@@ -1926,10 +1926,12 @@ AfterqueryObj.prototype.addRenderers = function(queue, args, more_options_in) {
             function(grid, done) {
       if (grid.data.length) {
         var doRender = function() {
-          var wantwidth = trace ? window.innerWidth - 40 : window.innerWidth;
+          var wantwidth = trace ? $(el).innerWidth - 40 : $(el).innerWidth;
           $(el).width(wantwidth);
           $(el).height(window.innerHeight);
-          options.height = window.innerHeight;
+          if(!has_more_opts || !more_options.disable_height) {
+            options.height = window.innerHeight;
+          }
           t.draw(datatable, options);
         };
         doRender();
