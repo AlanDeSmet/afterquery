@@ -1784,8 +1784,19 @@ AfterqueryObj.prototype.createTracesChart = function(grid, el, colsPerChart) {
   };
 
 
-AfterqueryObj.prototype.addRenderers = function(queue, args) {
+AfterqueryObj.NaNToZeroFormatter = function(queue, args) {
+  for(var row = 0; row<dt.getNumberOfRows(); row++) {
+    if(isNaN(dt.getValue(row, col))) {
+      dt.setValue(row, col, 0);
+      dt.setFormattedValue(row, col, '');
+    }
+  }
+}
+
+AfterqueryObj.prototype.addRenderers = function(queue, args, more_options_in) {
     var that = this;
+    var has_more_opts = more_options_in !== undefined;
+    var more_options = more_options_in;
     var trace = args.get('trace');
     var chartops = args.get('chart');
     var t, datatable, resizeTimer;
@@ -1797,7 +1808,7 @@ AfterqueryObj.prototype.addRenderers = function(queue, args) {
     var gridoptions = {
       intensify: intensify
     };
-	var el = $(this.elid("vizchart"))[0];
+    var el = $(this.elid("vizchart"))[0];
 
     this.enqueue(queue, 'gentable', function(grid, done) {
       // Some charts react badly to missing values, so fill them in.
@@ -1817,6 +1828,7 @@ AfterqueryObj.prototype.addRenderers = function(queue, args) {
         if (charttype == 'stackedarea' || charttype == 'stacked') {
           t = new google.visualization.AreaChart(el);
           options.isStacked = true;
+          options.explorer = {};
         } else if (charttype == 'column') {
           t = new google.visualization.ColumnChart(el);
         } else if (charttype == 'bar') {
@@ -1895,6 +1907,15 @@ AfterqueryObj.prototype.addRenderers = function(queue, args) {
             dateformat.format(datatable, coli);
           } else if (grid.types[coli] === AfterqueryObj.T_DATETIME) {
             datetimeformat.format(datatable, coli);
+          } else if (grid.types[coli] === AfterqueryObj.T_NUM) {
+            if(has_more_opts &&
+              more_options.num_pattern !== undefined) {
+              var numformat = new google.visualization.NumberFormat({
+                pattern: more_options.num_pattern
+              });
+              numformat.format(datatable, coli);
+              AfterqueryObj.NaNToZeroFormatter(datatable, coli);
+            }
           }
         }
       }
