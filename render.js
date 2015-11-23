@@ -576,7 +576,11 @@ AfterqueryObj.prototype.groupBy = function(ingrid, keys, values) {
         }
         valuecols.push(colnum);
         valuefuncs.push(func);
-        outgrid.headers.push(field == '*' ? '_count' : ingrid.headers[colnum]);
+        if (g) {
+          outgrid.headers.push(field == '*' ? '_count' : g[1] + ingrid.headers[colnum]);
+        } else {
+          outgrid.headers.push(field == '*' ? '_count' : ingrid.headers[colnum]);
+        }
         outgrid.types.push(func.return_type || ingrid.types[colnum]);
       }
     };
