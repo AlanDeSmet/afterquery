@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 /*
- * Additional modifications, copyright 2015 Alan De Smet, also licensed under
- * the Apache License, Version 2.0
+ * Additional modifications 2015 by Todd Tannenbaum and Alan De Smet, 
+ * Center for High Throughput Computing, University of Wisconsin - Madison.
+ * Licensed under the Apache License, Version 2.0.
  */
-
 'use strict';
 
 function AfterqueryObj(options) {
@@ -1357,6 +1357,9 @@ AfterqueryObj.prototype.fillNullsWithZero = function(grid) {
         if (grid.types[coli] === AfterqueryObj.T_NUM && row[coli] == undefined) {
           row[coli] = 0;
         }
+        if (grid.types[coli] === T_STRING && row[coli] == undefined) {
+          row[coli] = "_undefined_";
+        }
       }
     }
     return grid;
@@ -1797,16 +1800,14 @@ AfterqueryObj.prototype.addRenderers = function(queue, args) {
 	var el = $(this.elid("vizchart"))[0];
 
     this.enqueue(queue, 'gentable', function(grid, done) {
+      // Some charts react badly to missing values, so fill them in.
+      grid = fillNullsWithZero(grid);
       if (chartops) {
         var chartbits = chartops.split(',');
         var charttype = chartbits.shift();
         for (var charti in chartbits) {
           var kv = that.trySplitOne(chartbits[charti], '=');
           options[kv[0]] = kv[1];
-        }
-        if (charttype == 'stacked' || charttype == 'stackedarea') {
-          // Some charts react badly to missing values, so fill them in.
-          grid = that.fillNullsWithZero(grid);
         }
         grid = that.limitDecimalPrecision(grid);
 
