@@ -2305,6 +2305,17 @@ AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
 	this.addUrlGettersDirect(queue, args.get('url'), startdata);
 }
 
+
+AfterqueryObj.prototype.addKeepData = function(queue, args) {
+  var box = {};
+  this.enqueue(queue, 'keep', function(grid, done) {
+    box.value = grid;
+    done(grid);
+    }
+  );
+  return box;
+}
+
 AfterqueryObj.prototype.exec = function(query, startdata, done) {
     var args = AfterqueryObj.parseArgs(query);
     var queue = [];
@@ -2314,7 +2325,7 @@ AfterqueryObj.prototype.exec = function(query, startdata, done) {
   };
 
 
-AfterqueryObj.prototype.render = function(query, startdata, done) {
+AfterqueryObj.prototype.render = function(query, startdata, done, more_options) {
     var args = AfterqueryObj.parseArgs(query);
     var editlink = args.get('editlink');
     if (editlink == 0) {
@@ -2324,9 +2335,34 @@ AfterqueryObj.prototype.render = function(query, startdata, done) {
     var queue = [];
     this.addUrlGetters(queue, args, startdata);
     this.addTransforms(queue, args);
-    this.addRenderers(queue, args);
+    this.addRenderers(queue, args, more_options);
     this.finishQueue(queue, args, done);
   };
+
+
+/* Runs get getter (url=X), then returns it. Useful for
+   caching. */
+AfterqueryObj.prototype.load = function(query, startdata, done) {
+  var args = AfterqueryObj.parseArgs(query);
+  var queue = [];
+  this.addUrlGetters(queue, args, startdata);
+  var results = this.addKeepData(queue, args);
+  this.finishQueue(queue, args, done);
+  return results;
+}
+
+/* Runs all of the data transforms, then returns it. Useful
+   for creating a version to hand to some other system. */
+AfterqueryObj.prototype.load_post_transform = function(query, startdata, done) {
+  var args = AfterqueryObj.parseArgs(query);
+  var queue = [];
+  this.addUrlGetters(queue, args, startdata);
+  this.addTransforms(queue, args);
+  var results = this.addKeepData(queue, args);
+  this.finishQueue(queue, args, done);
+  return results;
+}
+
 
 // To appease v8shell
 try {
