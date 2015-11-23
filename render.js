@@ -1798,16 +1798,14 @@ var afterquery = (function() {
     var el = document.getElementById('vizchart');
 
     enqueue(queue, 'gentable', function(grid, done) {
+      // Some charts react badly to missing values, so fill them in.
+      grid = fillNullsWithZero(grid);
       if (chartops) {
         var chartbits = chartops.split(',');
         var charttype = chartbits.shift();
         for (var charti in chartbits) {
           var kv = trySplitOne(chartbits[charti], '=');
           options[kv[0]] = kv[1];
-        }
-        if (charttype == 'stacked' || charttype == 'stackedarea') {
-          // Some charts react badly to missing values, so fill them in.
-          grid = fillNullsWithZero(grid);
         }
         grid = limitDecimalPrecision(grid);
 
