@@ -1358,6 +1358,9 @@ var afterquery = (function() {
         if (grid.types[coli] === T_NUM && row[coli] == undefined) {
           row[coli] = 0;
         }
+        if (grid.types[coli] === T_STRING && row[coli] == undefined) {
+          row[coli] = "_undefined_";
+        }
       }
     }
     return grid;
