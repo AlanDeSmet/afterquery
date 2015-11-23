@@ -1990,20 +1990,24 @@ AfterqueryObj.prototype.addGVizChartOption = function(options, key, value) {
     }
   };
 
+// Needs to be shared by all instances.
+AfterqueryObj.vizstep = 0;
+
 AfterqueryObj.prototype.finishQueue = function(queue, args, done) {
     var that = this;
     var trace = args.get('trace');
     if (trace) {
       var prevdata;
       var after_each = function(grid, stepi, nsteps, text, msec_time) {
-        $(this.elid('vizlog')).append('<div class="vizstep" id="step' + stepi + '">' +
+		AfterqueryObj.vizstep++;
+        $(that.elid('vizlog')).append('<div class="vizstep" id="step' + AfterqueryObj.vizstep + '">' +
                             '  <div class="text"></div>' +
                             '  <div class="grid"></div>' +
                             '</div>');
-        $('#step' + stepi + ' .text').text('Step ' + stepi +
+        $('#step' + AfterqueryObj.vizstep + ' .text').text('Step ' + stepi +
                                            ' (' + msec_time + 'ms):  ' +
                                            text);
-        var viewel = $('#step' + stepi + ' .grid');
+        var viewel = $('#step' + AfterqueryObj.vizstep + ' .grid');
         if (prevdata != grid.data) {
           var t = new google.visualization.Table(viewel[0]);
           var datatable = AfterqueryObj.dataToGvizTable({
