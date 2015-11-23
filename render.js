@@ -2105,10 +2105,7 @@ AfterqueryObj.prototype.extractJsonFromJsonp = function(text, success_func) {
 	// regularly appended.  Maintaining the framing "[" "]" is a 
 	// nuisance, so it doesn't get done.
 	if(data.charAt(0) !== '[') {
-		console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		console.log(data[0]);
-		data = data;
-		//data = "[" + data + "]";
+		data = "[" + data + "]";
 	}
 
     data = JSON.parse(data);
