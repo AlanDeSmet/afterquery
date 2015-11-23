@@ -1357,7 +1357,7 @@ AfterqueryObj.prototype.fillNullsWithZero = function(grid) {
         if (grid.types[coli] === AfterqueryObj.T_NUM && row[coli] == undefined) {
           row[coli] = 0;
         }
-        if (grid.types[coli] === T_STRING && row[coli] == undefined) {
+        if (grid.types[coli] === AfterqueryObj.T_STRING && row[coli] == undefined) {
           row[coli] = "_undefined_";
         }
       }
@@ -1801,7 +1801,7 @@ AfterqueryObj.prototype.addRenderers = function(queue, args) {
 
     this.enqueue(queue, 'gentable', function(grid, done) {
       // Some charts react badly to missing values, so fill them in.
-      grid = fillNullsWithZero(grid);
+      grid = that.fillNullsWithZero(grid);
       if (chartops) {
         var chartbits = chartops.split(',');
         var charttype = chartbits.shift();
