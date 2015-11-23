@@ -1933,6 +1933,9 @@ AfterqueryObj.prototype.addRenderers = function(queue, args, more_options_in) {
             options.height = window.innerHeight;
           }
           t.draw(datatable, options);
+          if(has_more_opts && more_options.select_handler !== undefined) {
+            google.visualization.events.addListener(t, 'select', function(e) { more_options.select_handler(e,t, datatable); });
+          }
         };
         doRender();
         $(window).resize(function() {
