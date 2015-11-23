@@ -2275,10 +2275,9 @@ AfterqueryObj.prototype.getUrlData = function(url, success_func, error_func) {
   };
 
 
-AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
+AfterqueryObj.prototype.addUrlGettersDirect = function(queue, url, startdata) {
     var that = this;
     if (!startdata) {
-      var url = args.get('url');
       this.console.debug('original data url:', url);
       if (!url) throw new Error('Missing url= in query parameter');
       if (url.indexOf('//') == 0) url = window.location.protocol + url;
@@ -2302,6 +2301,9 @@ AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
     });
   };
 
+AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
+	this.addUrlGettersDirect(queue, args.get('url'), startdata);
+}
 
 AfterqueryObj.prototype.exec = function(query, startdata, done) {
     var args = AfterqueryObj.parseArgs(query);
