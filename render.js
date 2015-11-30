@@ -1522,11 +1522,11 @@ AfterqueryObj.mergeGrids = function(a, b) {
     var newrow = new Array(a.headers.length);
     for(i = 0; i < a.headers.length; i++) {
       switch(a.types[i]) {
-      case T_NUM: newrow[i] = NaN; break;
-      case T_DATE: newrow[i] = new Date(1970,1,1,0,0,0); break;
-      case T_DATETIME: newrow[i] = new Date(1970,1,1,0,0,0); break;
-      case T_BOOL: newrow[i] = NaN; break;
-      case T_STRING: newrow[i] = ''; break;
+      case AfterqueryObj.T_NUM: newrow[i] = NaN; break;
+      case AfterqueryObj.T_DATE: newrow[i] = new Date(1970,1,1,0,0,0); break;
+      case AfterqueryObj.T_DATETIME: newrow[i] = new Date(1970,1,1,0,0,0); break;
+      case AfterqueryObj.T_BOOL: newrow[i] = NaN; break;
+      case AfterqueryObj.T_STRING: newrow[i] = ''; break;
       default: newrow[i] = null;
       }
     }
@@ -1564,16 +1564,16 @@ AfterqueryObj.mergeGrids = function(a, b) {
     return out;
   }
 
-AfterqueryObj.gridFromManyData = function(rawdata) {
+AfterqueryObj.prototype.gridFromManyData = function(rawdata) {
     if(rawdata.length === 0) {
       return {headers: [], data: [], types: []};
     }
 
-    var grid = gridFromData(rawdata[0]);
+    var grid = this.gridFromData(rawdata[0]);
     var newgrid;
     var i;
     for(i = 1; i < rawdata.length; i++) {
-      newgrid = gridFromData(rawdata[i]);
+      newgrid = this.gridFromData(rawdata[i]);
       grid = AfterqueryObj.mergeGrids(grid,newgrid);
     }
     return grid;
@@ -2258,13 +2258,15 @@ AfterqueryObj.prototype.getUrlData_xhr = function(state, success_func, error_fun
       dataType: 'text',
       success: function(text) {
         that.extractJsonFromJsonp(text, function(grid) {
-          AfterqueryObj.getUrlDataSuccess(grid, state, success_func, error_func);
+		  that.getUrlDataSuccess(grid, state, success_func, error_func);
           }
           );
         },
       error: function(jqXHR, textStatus, errorThrown) {
         console.debug("XHR failed:", textStatus, errorThrown);
-        error_func(state, success_func, AfterqueryObj.getUrlDataFailure);
+        error_func(state, success_func, 
+			function(a,b,c,d,e) { that.getUrlDataFailure(a,b,c,d,e); }
+			);
         }
       }
     );
@@ -2281,7 +2283,7 @@ AfterqueryObj.prototype.getUrlData_jsonp = function(state, success_func, error_f
       var successfunc_called;
       var real_success_func = function(data) {
         AfterqueryObj.log('calling success_func');
-        getUrlDataSuccess(data, state, success_func, error_func);
+        that.getUrlDataSuccess(data, state, success_func, error_func);
         successfunc_called = true;
       };
 
@@ -2348,7 +2350,7 @@ AfterqueryObj.prototype.getUrlData_jsonp = function(state, success_func, error_f
         if (successfunc_called) {
           AfterqueryObj.log('json load was successful.');
         } else {
-          AfterqueryObj.getUrlDataFailure("Error loading data; check javascript console for details.", "", state, success_func, error_func);
+		  that.getUrlDataFailure("Error loading data; check javascript console for details.", "", state, success_func, error_func);
         }
       };
 
@@ -2376,17 +2378,19 @@ AfterqueryObj.prototype.getUrlData_jsonp = function(state, success_func, error_f
     document.body.appendChild(iframe);
   };
 
-AfterqueryObj.getUrlDataSuccess = function(data, state, success_func, error_func) {
+AfterqueryObj.prototype.getUrlDataSuccess = function(data, state, success_func, error_func) {
+	var that = this;
     var url = state.todo.shift();
     state.success.push(url);
     state.rawdata.push(data);
-    setTimeout(function(){ getUrlData(state, success_func, error_func); }, 0);
+    setTimeout(function(){ that.getUrlData(state, success_func, error_func); }, 0);
   }
 
-AfterqueryObj.getUrlDataFailure = function(textStatus, errorThrown, state, success_func, error_func) {
+AfterqueryObj.prototype.getUrlDataFailure = function(textStatus, errorThrown, state, success_func, error_func) {
+	var that = this;
     var url = state.todo.shift();
     state.failure.push({url:url, status: textStatus+" "+errorThrown});
-    setTimeout(function(){ getUrlData(state, success_func, error_func); }, 0);
+    setTimeout(function(){ that.getUrlData(state, success_func, error_func); }, 0);
   }
 
 
@@ -2404,7 +2408,7 @@ AfterqueryObj.prototype.getUrlData = function(state, success_func, error_func) {
     }
 
     var url = state.todo[0];
-    showstatus('Loading <a href="' + encodeURI(url) + '">data</a>...');
+    this.showstatus('Loading <a href="' + encodeURI(url) + '">data</a>...');
 
     var that = this;
     AfterqueryObj.log('fetching data url:', url);
@@ -2429,7 +2433,7 @@ AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
         if(key === 'url') {
           var url = args.all[i][1];
           if (url.indexOf('//') == 0) url = window.location.protocol + url;
-          url = extendDataUrl(url);
+          url = this.extendDataUrl(url);
           urls.push(url);
         }
       }
@@ -2445,8 +2449,8 @@ AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
         rawdata: [],
       };
 
-      enqueue(queue, 'get data', function(_, done) {
-        that.getUrlData(state, wrap(done), wrap(gotError, urls[0]));
+      this.enqueue(queue, 'get data', function(_, done) {
+        that.getUrlData(state, that.wrap(done), that.wrap(that.gotError, urls[0]));
       });
     } else {
       this.enqueue(queue, 'init data', function(_, done) {
@@ -2456,8 +2460,7 @@ AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
 
     this.enqueue(queue, 'parse', function(rawdata, done) {
       AfterqueryObj.log('rawdata:', rawdata);
-      var outgrid = that.gridFromData(rawdata);
-      var outgrid = AfterqueryObj.gridFromManyData(rawdata);
+      var outgrid = that.gridFromManyData(rawdata);
       AfterqueryObj.log('grid:', outgrid);
       done(outgrid);
     });
