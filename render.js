@@ -2258,15 +2258,15 @@ AfterqueryObj.prototype.getUrlData_xhr = function(state, success_func, error_fun
       dataType: 'text',
       success: function(text) {
         that.extractJsonFromJsonp(text, function(grid) {
-		  that.getUrlDataSuccess(grid, state, success_func, error_func);
+        that.getUrlDataSuccess(grid, state, success_func, error_func);
           }
           );
         },
       error: function(jqXHR, textStatus, errorThrown) {
         console.debug("XHR failed:", textStatus, errorThrown);
         error_func(state, success_func, 
-			function(a,b,c,d,e) { that.getUrlDataFailure(a,b,c,d,e); }
-			);
+          function(a,b,c,d,e) { that.getUrlDataFailure(a,b,c,d,e); }
+          );
         }
       }
     );
@@ -2350,7 +2350,7 @@ AfterqueryObj.prototype.getUrlData_jsonp = function(state, success_func, error_f
         if (successfunc_called) {
           AfterqueryObj.log('json load was successful.');
         } else {
-		  that.getUrlDataFailure("Error loading data; check javascript console for details.", "", state, success_func, error_func);
+          that.getUrlDataFailure("Error loading data; check javascript console for details.", "", state, success_func, error_func);
         }
       };
 
@@ -2379,7 +2379,7 @@ AfterqueryObj.prototype.getUrlData_jsonp = function(state, success_func, error_f
   };
 
 AfterqueryObj.prototype.getUrlDataSuccess = function(data, state, success_func, error_func) {
-	var that = this;
+    var that = this;
     var url = state.todo.shift();
     state.success.push(url);
     state.rawdata.push(data);
@@ -2387,7 +2387,7 @@ AfterqueryObj.prototype.getUrlDataSuccess = function(data, state, success_func, 
   }
 
 AfterqueryObj.prototype.getUrlDataFailure = function(textStatus, errorThrown, state, success_func, error_func) {
-	var that = this;
+    var that = this;
     var url = state.todo.shift();
     state.failure.push({url:url, status: textStatus+" "+errorThrown});
     setTimeout(function(){ that.getUrlData(state, success_func, error_func); }, 0);
