@@ -2454,7 +2454,7 @@ AfterqueryObj.prototype.addUrlGetters = function(queue, args, startdata) {
       });
     } else {
       this.enqueue(queue, 'init data', function(_, done) {
-        done(startdata);
+        done([startdata]);
       });
     }
 
